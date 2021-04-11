@@ -1,0 +1,389 @@
+<html>
+<head>
+<script src= "https://d3js.org/d3.v6.min.js" ></script>
+
+<body>
+<meta charset="utf-8">
+<svg id="stackedbar" height=500 width=600>
+<!-- Populating dynamically -->
+</svg>
+
+
+<script>
+let svgBar = d3.select("svg#stackedbar");
+const widthBar = svgBar.attr("width");
+const heightBar = svgBar.attr("height");
+const marginsBar = { "top": 10, "right": 10, "bottom": 50, "left": 50 };
+const chartWidthBar = widthBar - marginsBar.left - marginsBar.right;
+const chartHeightBar = heightBar - marginsBar.top - marginsBar.bottom;
+
+// Chart Legend
+svgBar.append("text").text("Diversity Breakdown")
+  .attr("x", 310)
+  .attr("y", 250)
+  .style("font-size", "15px");
+svgBar.append("line")
+  .attr("x1", 310)
+  .attr("x2", 340)
+  .attr("y1", 275)
+  .attr("y2", 275)
+  .style("stroke", "black")
+  .style("stroke-width", 30);
+svgBar.append("text").text("White")
+  .attr("x", 350)
+  .attr("y", 280)
+  .style("font-size", "15px");
+svgBar.append("line")
+  .attr("x1", 310)
+  .attr("x2", 340)
+  .attr("y1", 320)
+  .attr("y2", 320)
+  .style("stroke", "crimson")
+  .style("stroke-width", 30);
+svgBar.append("text").text("POC")
+  .attr("x", 350)
+  .attr("y", 325)
+  .style("font-size", "15px");
+
+
+d3.csv("group_company_final.csv", d3.autoType)
+  .then((data) => {
+
+// var parse = d3.time.format("%Y").parse;
+
+    var dataset = d3.layout.stack()([" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "].map(function(company){
+        return data.map(function(d){
+            return {x: parse(d.company), y: +d[company]}
+        });
+    }));
+
+var x = d3.scale.ordinal()
+    .domain(dataset[0].map(function(d){return d.x}))
+    .range([chartHeightBar, marginsBar.top])
+
+var y = d3.scale.linear()
+    .domain([0, d3.max(dataset, function(d) {return d3.max(d, function(d){return d.y0+d.y;}); })])
+
+var colors = ["#d25c4d", "#f2b447", "#d9d574", '#e41a1c','#377eb8','#4daf4a'];
+
+var yAxis = svgBar.axis()
+    .scale(y)
+    .orient("left")
+    .ticks(5)
+    .tickSize(-width, 0,0)
+    .tickFormat(function(d){return d});
+
+var xAxis = svgBar.axis()
+    .scale(x)
+    .orient("bottom")
+    .tickFormat(d3.time.format("%Y"));
+
+    svgBar.append("g")
+      .attr("class", "y axis")
+      .call(yAxis);
+
+    svgBar.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+
+    // Create groups for each series, rects for each segment
+    var groups = svgBar.selectAll("g.cost")
+      .data(dataset)
+      .enter().append("g")
+      .attr("class", "cost")
+      .style("fill", function(d, i) { return colors[i]; });
+
+    var rect = groups.selectAll("rect")
+      .data(function(d) { return d; })
+      .enter()
+      .append("rect")
+      .attr("x", function(d) { return x(d.x); })
+      .attr("y", function(d) { return y(d.y0 + d.y); })
+      .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
+      .attr("width", x.rangeBand())
+      .on("mouseover", function() { tooltip.style("display", null); })
+      .on("mouseout", function() { tooltip.style("display", "none"); })
+      .on("mousemove", function(d) {
+        var xPosition = d3.mouse(this)[0] - 15;
+        var yPosition = d3.mouse(this)[1] - 25;
+        tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+        tooltip.select("text").text(d.y);
+      });
+
+
+    // Draw legend
+    var legend = svgBar.selectAll(".legend")
+      .data(colors)
+      .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(30," + i * 19 + ")"; });
+
+    legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", function(d, i) {return colors.slice().reverse()[i];});
+
+    legend.append("text")
+      .attr("x", width + 5)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "start")
+      .text(function(d, i) {
+        switch (i) {
+          case 0: return "Anjou pears";
+          case 1: return "Naval oranges";
+          case 2: return "McIntosh apples";
+          case 3: return "Red Delicious apples";
+        }
+      });
+
+
+    // Prep the tooltip bits, initial display is hidden
+    var tooltip = svgBar.append("g")
+      .attr("class", "tooltip")
+      .style("display", "none");
+
+    tooltip.append("rect")
+      .attr("width", 30)
+      .attr("height", 20)
+      .attr("fill", "white")
+      .style("opacity", 0.5);
+
+    tooltip.append("text")
+      .attr("x", 15)
+      .attr("dy", "1.2em")
+      .style("text-anchor", "middle")
+      .attr("font-size", "12px")
+      .attr("font-weight", "bold");
+
+
+
+});
+</script>
+
+<!--
+  function textMargin(comparisonValue, marginList) {
+    if (comparisonValue < 10) {
+      return marginList[0];
+    } else if (comparisonValue < 100) {
+      return marginList[1];
+    } else if (comparisonValue < 1000) {
+      return marginList[2];
+    } else {
+      return marginList[3];
+    }
+  }
+
+  let svgBar = d3.select("svg#barChart");
+  const widthBar = svgBar.attr("width");
+  const heightBar = svgBar.attr("height");
+  const marginsBar = { "top": 10, "right": 10, "bottom": 50, "left": 50 };
+  const chartWidthBar = widthBar - marginsBar.left - marginsBar.right;
+  const chartHeightBar = heightBar - marginsBar.top - marginsBar.bottom;
+
+  // Chart Legend
+  svgBar.append("text").text("Legend")
+    .attr("x", 310)
+    .attr("y", 250)
+    .style("font-size", "15px");
+  svgBar.append("line")
+    .attr("x1", 310)
+    .attr("x2", 340)
+    .attr("y1", 275)
+    .attr("y2", 275)
+    .style("stroke", "black")
+    .style("stroke-width", 30);
+  svgBar.append("text").text("Something")
+    .attr("x", 350)
+    .attr("y", 280)
+    .style("font-size", "15px");
+  svgBar.append("line")
+    .attr("x1", 310)
+    .attr("x2", 340)
+    .attr("y1", 320)
+    .attr("y2", 320)
+    .style("stroke", "crimson")
+    .style("stroke-width", 30);
+  svgBar.append("text").text("Anotherthing")
+    .attr("x", 350)
+    .attr("y", 325)
+    .style("font-size", "15px");
+
+
+  d3.csv("group_company_final.csv", d3.autoType)
+    .then((data) => {
+
+      //  Scales and Extents
+      const companyExtent = d3.extent(data, d => d['company']);
+      var companycale = d3.scaleLinear().domain(companyExtent).range([chartHeightBar, marginsBar.top]);
+
+      // Create New Data List
+      yearToReleaseCountData = []
+      for (let releaseYear = companyExtent[0]; releaseYear <= companyExtent[1]; releaseYear++) {
+        yearCountPair = { 'year_added': releaseYear, 'release_count': 0, "released_movie_count": 0, "released_tv_count": 0 };
+        yearToReleaseCountData.push(yearCountPair);
+      };
+      data.forEach(d => {
+        var release_year = d['date_added'];
+        var type = d['type'];
+        yearToReleaseCountData.forEach(d_dict => {
+          if (d_dict['year_added'] === release_year) {
+            d_dict['release_count'] += 1;
+            if (d['type'] === "Movie") {
+              d_dict['released_movie_count'] += 1;
+            }
+          }
+        });
+      });
+
+      const releaseCountExtent = d3.extent(yearToReleaseCountData, d => d['release_count']);
+      var releaseCountScale = d3.scaleLog().domain(releaseCountExtent).range([marginsBar.left * 2, chartWidthBar]);
+      console.log(releaseCountScale(25))
+      console.log(releaseCountScale(13))
+      console.log(releaseCountScale(3))
+
+      yearToReleaseCountData.forEach((d, i) => {
+        releasedTVCount = d['release_count'] - d['released_movie_count'];
+        moviePercentage = d['released_movie_count'] / d['release_count']
+        tvPerecentage = releasedTVCount / d['release_count']
+        barLength = releaseCountScale(d['release_count']) - marginsBar.left
+        xRedPortion = marginsBar.left + (barLength * moviePercentage)
+
+        if (d['released_movie_count'] > 0) {
+          svgBar.append("line")
+            .attr("x1", marginsBar.left)
+            .attr("x2", xRedPortion)
+            .attr("y1", yearAddedScale(d['year_added']))
+            .attr("y2", yearAddedScale(d['year_added']))
+            .style("stroke", "crimson")
+            .style("stroke-width", 30)
+
+          var movieTextMargin = 15;
+          svgBar.append("text")
+            .attr("text-anchor", "middle")
+            .attr("font-size", "10px")
+            .attr("x", xRedPortion - movieTextMargin)
+            .attr('y', yearAddedScale(d['year_added']) + 4)
+            .attr("fill", "white")
+            .text((moviePercentage * 100).toFixed(0).concat("%"));
+        }
+
+        if (releasedTVCount > 0) {
+          svgBar.append("line")
+            .attr("x1", xRedPortion)
+            .attr("x2", releaseCountScale(d['release_count']))
+            .attr("y1", yearAddedScale(d['year_added']))
+            .attr("y2", yearAddedScale(d['year_added']))
+            .style("stroke", "black")
+            .style("stroke-width", 30)
+
+          var tvTextMargin = 15;
+          svgBar.append("text")
+            .attr("text-anchor", "middle")
+            .attr("font-size", "10px")
+            .attr("x", releaseCountScale(d['release_count']) - tvTextMargin)
+            .attr('y', yearAddedScale(d['year_added']) + 4)
+            .attr("fill", "white")
+            .text((tvPerecentage * 100).toFixed(0).concat("%"));
+
+        }
+
+        var totalTextMargin = textMargin(releasedTVCount, [10, 15, 20, 25])
+        svgBar.append("text")
+          .attr("text-anchor", "middle")
+          .attr("font-size", "15px")
+          .attr("x", releaseCountScale(d['release_count']) + totalTextMargin)
+          .attr('y', yearAddedScale(d['year_added']) + 5)
+          .text(d['release_count']);
+      });
+    },
+      (error) => { console.log(error) });
+</script> -->
+<!--
+
+<script>
+let svg = d3.select("svg#stackedbar");
+  const width = svgBar.attr("width");
+  const height = svgBar.attr("height");
+  const margins = { "top": 10, "right": 10, "bottom": 50, "left": 50 };
+  const chartWidth = width - margins.left - margins.right;
+  const chartHeight = height - margins.top - margins.bottom;
+
+  // append the svg object to the body of the page
+  var svg = d3.select("svg#stackedbar")
+    .append("g")
+    .attr("transform",
+            "translate(" + margins.left + "," + margins.top + ")");
+
+    // Parse the Data
+d3.csv("group_company_final.csv", d3.autoType)
+  .then((data) => {
+
+    data = data.filter( (d) => {return d[" % Asian "] != NaN});
+
+       // data.forEach( (d, i) => {
+       //             d[" % Asian "] = d[" % Asian "].replace(NaN, 0));
+       // });
+
+    console.log(data.columns[" % Asian "])
+
+  // List of subgroups = header of the csv files = soil condition here
+// 3: " Female % " 4: " Male % " 5: " % White " 6: " % Asian " 7: " % Latino " 8: " % Black " 9: " % Multi " 10: " % Undeclared "
+  var subgroups = data.columns[6]
+    console.log(subgroups)
+
+  // List of groups = species here = value of the first column called group -> I show them on the X axis
+  var groups = d3.map(data, function(d){return(d.group)}).keys()
+
+  // Add X axis
+  var x = d3.scaleBand()
+      .domain(groups)
+      .range([0, width])
+      .padding([0.2])
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickSizeOuter(0));
+
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, 100])
+    .range([ height, 0 ]);
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+  // color palette = one color per subgroup
+  var color = d3.scaleOrdinal()
+    .domain(subgroups)
+    .range(['#e41a1c','#377eb8','#4daf4a', '#e41a1c','#377eb8','#4daf4a'])
+
+  //stack the data? stack per subgroup
+  var stackedData = d3.stack()
+    .keys(subgroups)
+    (data)
+
+  // Show the bars
+  svg.append("g")
+    .selectAll("g")
+    // Enter in the stack data = loop key per key = group per group
+    .data(stackedData)
+    .enter().append("g")
+      .attr("fill", function(d) { return color(d.key); })
+      .selectAll("rect")
+      // enter a second time = loop subgroup per subgroup to add all rectangles
+      .data(function(d) { return d; })
+      .enter().append("rect")
+        .attr("x", function(d) { return x(d.data.group); })
+        .attr("y", function(d) { return y(d[1]); })
+        .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+        .attr("width",x.bandwidth())
+});
+
+</script> -->
+
+
+</body>
+</head>
+</html>
