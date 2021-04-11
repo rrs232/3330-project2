@@ -4,10 +4,14 @@
 var race = [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "]
 d3.csv("group_company_final.csv", d3.autoType)
   .then((data) => {
+
+    data = data.filter( (d) => {return d['Date'] === "Jan 2018"});
+
     stackdata = race.map(function(c) {
     return data.map(function(d,i) {
       return {x:i, y:d[c]} })
     })
+
   var svg = d3.select("body")
     .append("svg")
     .attr("width", 250)
