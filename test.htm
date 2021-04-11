@@ -8,6 +8,8 @@ d3.csv("group_company_final.csv", d3.autoType)
     return data.map(function(d,i) {
       return {x:i, y:d[c]} })
     })
+    console.log(data)
+    console.log(stackdata)
   var svg = d3.select("body")
     .append("svg")
     .attr("width", 250)
@@ -17,7 +19,7 @@ d3.csv("group_company_final.csv", d3.autoType)
   // Data, stacked
   stack(stackdata)
   // gold silver colors
-  var colors = ["gold", "silver"]
+  var colors = ["rgb(65,187,197)", "rgb(140,2,80)", "rgb(192,225,92)", "rgb(161,148,220)", "rgb(92,240,112)", "rgb(7,92,98)"]
   // Add a group for each row of data
   var groups = svg.selectAll("g")
     .data(stackdata)
