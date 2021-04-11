@@ -1,0 +1,122 @@
+<html>
+<head>
+<script src= "https://d3js.org/d3.v6.min.js" ></script>
+
+<body>
+<meta charset="utf-8">
+<svg id="stackedbar" height=500 width=600>
+<!-- Populating dynamically -->
+</svg>
+
+<script>
+let svg = d3.select("svg#stackedbar");
+const widthBar = svg.attr("width");
+const heightBar = svg.attr("height");
+const margins = { "top": 10, "right": 10, "bottom": 50, "left": 50 };
+const chartWidthBar = widthBar - margins.left - margins.right;
+const chartHeightBar = heightBar - margins.top - margins.bottom;
+
+// Chart Legend
+svg.append("text").text("Legend")
+  .attr("x", 310)
+  .attr("y", 250)
+  .style("font-size", "15px");
+svg.append("line")
+  .attr("x1", 310)
+  .attr("x2", 340)
+  .attr("y1", 275)
+  .attr("y2", 275)
+  .style("stroke", "black")
+  .style("stroke-width", 30);
+svg.append("text").text("Something")
+  .attr("x", 350)
+  .attr("y", 280)
+  .style("font-size", "15px");
+svg.append("line")
+  .attr("x1", 310)
+  .attr("x2", 340)
+  .attr("y1", 320)
+  .attr("y2", 320)
+  .style("stroke", "crimson")
+  .style("stroke-width", 30);
+svg.append("text").text("Anotherthing")
+  .attr("x", 350)
+  .attr("y", 325)
+  .style("font-size", "15px");
+
+// append the svg object to the body of the page
+svg.append("g")
+  .attr("transform",
+          "translate(" + margins.left + "," + margins.top + ")");
+
+    // Parse the Data
+d3.csv("group_company_final.csv", d3.autoType)
+  .then((data) => {
+
+    console.log(data)
+
+    data = data.filter( (d) => {return d[" % Asian "] != NaN});
+
+       // data.forEach( (d, i) => {
+       //             d[" % Asian "] = d[" % Asian "].replace(NaN, 0));
+       // });
+
+    console.log(data.columns[" % Asian "])
+
+  // List of subgroups = header of the csv files = soil condition here
+// 3: " Female % " 4: " Male % " 5: " % White " 6: " % Asian " 7: " % Latino " 8: " % Black " 9: " % Multi " 10: " % Undeclared "
+  var subgroups = data.columns[6]
+    console.log(subgroups)
+
+  // List of groups = species here = value of the first column called group -> I show them on the X axis
+  var groups = d3.map(data, function(d){return(d.group)}).keys()
+
+  // Add X axis
+  var x = d3.scaleBand()
+      .domain(groups)
+      .range([0, width])
+      .padding([0.2])
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickSizeOuter(0));
+
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, 100])
+    .range([ height, 0 ]);
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+  // color palette = one color per subgroup
+  var color = d3.scaleOrdinal()
+    .domain(subgroups)
+    .range(['#e41a1c','#377eb8','#4daf4a', '#e41a1c','#377eb8','#4daf4a'])
+
+  //stack the data? stack per subgroup
+  var stackedData = d3.stack()
+    .keys(subgroups)
+    (data)
+
+  // Show the bars
+  svg.append("g")
+    .selectAll("g")
+    // Enter in the stack data = loop key per key = group per group
+    .data(stackedData)
+    .enter().append("g")
+      .attr("fill", function(d) { return color(d.key); })
+      .selectAll("rect")
+      // enter a second time = loop subgroup per subgroup to add all rectangles
+      .data(function(d) { return d; })
+      .enter().append("rect")
+        .attr("x", function(d) { return x(d.data.group); })
+        .attr("y", function(d) { return y(d[1]); })
+        .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+        .attr("width",x.bandwidth())
+});
+
+</script>
+
+
+</body>
+</head>
+</html>
