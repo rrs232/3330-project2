@@ -1,5 +1,16 @@
 <script src= "https://d3js.org/d3.v6.min.js" ></script>
+
+<svg id="stackedbar" height=500 width=600>
+<!-- Populating dynamically -->
+</svg>
+
 <script>
+let svg = d3.select("svg#stackedbar");
+const widthBar = svg.attr("width");
+const heightBar = svg.attr("height");
+const margins = { "top": 10, "right": 10, "bottom": 50, "left": 50 };
+const chartWidthBar = widthBar - margins.left - margins.right;
+const chartHeightBar = heightBar - margins.top - margins.bottom;
 
 var race = [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "]
 d3.csv("group_company_final.csv", d3.autoType)
@@ -11,7 +22,12 @@ d3.csv("group_company_final.csv", d3.autoType)
     return data.map(function(d,i) {
       return {x:i, y:d[c]} })
     })
+<<<<<<< HEAD
 
+=======
+    console.log(data)
+    console.log(stackdata)
+>>>>>>> 615ad0ccc2d5f3c12ea83062d817ac49f434189e
   var svg = d3.select("body")
     .append("svg")
     .attr("width", 250)
@@ -21,7 +37,7 @@ d3.csv("group_company_final.csv", d3.autoType)
   // Data, stacked
   stack(stackdata)
   // gold silver colors
-  var colors = ["gold", "silver"]
+  var colors = ["rgb(65,187,197)", "rgb(140,2,80)", "rgb(192,225,92)", "rgb(161,148,220)", "rgb(92,240,112)", "rgb(7,92,98)"]
   // Add a group for each row of data
   var groups = svg.selectAll("g")
     .data(stackdata)
