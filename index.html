@@ -48,35 +48,33 @@ svgBar.append("text").text("POC")
 
 d3.csv("group_company_final.csv", d3.autoType)
   .then((data) => {
+    var race = [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "]
+    var raceExtent = d3.extent(race)
 
 // var parse = d3.time.format("%Y").parse;
 
-    var dataset = d3.layout.stack()([" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "].map(function(company){
+    var dataset = d3.stack()([" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "].map(function(company){
         return data.map(function(d){
-            return {x: parse(d.company), y: +d[company]}
+            return {x: d.company, y: +d[company]}
         });
     }));
+    console.log(dataset)
+    console.log(data)
 
-var x = d3.scale.ordinal()
-    .domain(dataset[0].map(function(d){return d.x}))
+var x = d3.scaleOrdinal()
+    .domain(raceExtent)
     .range([chartHeightBar, marginsBar.top])
 
-var y = d3.scale.linear()
+var y = d3.scaleLinear()
     .domain([0, d3.max(dataset, function(d) {return d3.max(d, function(d){return d.y0+d.y;}); })])
 
 var colors = ["#d25c4d", "#f2b447", "#d9d574", '#e41a1c','#377eb8','#4daf4a'];
 
-var yAxis = svgBar.axis()
-    .scale(y)
-    .orient("left")
-    .ticks(5)
-    .tickSize(-width, 0,0)
-    .tickFormat(function(d){return d});
+var yAxis = d3.axisLeft(svgBar)
 
-var xAxis = svgBar.axis()
+var xAxis = d3.axisBottom(svgBar)
     .scale(x)
-    .orient("bottom")
-    .tickFormat(d3.time.format("%Y"));
+    .tickFormat(d3.timeParse("%Y"));
 
     svgBar.append("g")
       .attr("class", "y axis")
@@ -84,7 +82,7 @@ var xAxis = svgBar.axis()
 
     svgBar.append("g")
       .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
+      .attr("transform", "translate(0," + heightBar + ")")
       .call(xAxis);
 
 
@@ -102,7 +100,7 @@ var xAxis = svgBar.axis()
       .attr("x", function(d) { return x(d.x); })
       .attr("y", function(d) { return y(d.y0 + d.y); })
       .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
-      .attr("width", x.rangeBand())
+      .attr("width", 5)
       .on("mouseover", function() { tooltip.style("display", null); })
       .on("mouseout", function() { tooltip.style("display", "none"); })
       .on("mousemove", function(d) {
@@ -121,13 +119,13 @@ var xAxis = svgBar.axis()
       .attr("transform", function(d, i) { return "translate(30," + i * 19 + ")"; });
 
     legend.append("rect")
-      .attr("x", width - 18)
+      .attr("x", widthBar - 18)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", function(d, i) {return colors.slice().reverse()[i];});
 
     legend.append("text")
-      .attr("x", width + 5)
+      .attr("x", widthBar + 5)
       .attr("y", 9)
       .attr("dy", ".35em")
       .style("text-anchor", "start")

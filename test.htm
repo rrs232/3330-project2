@@ -1,0 +1,39 @@
+<script src= "https://d3js.org/d3.v6.min.js" ></script>
+<script>
+
+var race = [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "]
+d3.csv("group_company_final.csv", d3.autoType)
+  .then((data) => {
+    stackdata = race.map(function(c) {
+    return data.map(function(d,i) {
+      return {x:i, y:d[c]} })
+    })
+  var svg = d3.select("body")
+    .append("svg")
+    .attr("width", 250)
+    .attr("height", 250)
+  // Set up stack method
+  var stack = d3.stack()
+  // Data, stacked
+  stack(stackdata)
+  // gold silver colors
+  var colors = ["gold", "silver"]
+  // Add a group for each row of data
+  var groups = svg.selectAll("g")
+    .data(stackdata)
+    .enter()
+    .append("g")
+    .style("fill", function(d, i) { return colors[i]})
+  // Add a rect for each data value
+  var rects = groups.selectAll("rect")
+    .data(function(d) {return d})
+    .enter()
+    .append("rect")
+    .attr("x", function(d, i) {return i*28})
+    .attr("y", function(d) {return d.y0})
+    .attr("height", function(d) {return d.y})
+    .attr("width", 24)
+
+  });
+
+</script>
