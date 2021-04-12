@@ -16,22 +16,23 @@ var race = [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " 
 d3.csv("group_company_final.csv", d3.autoType)
   .then((data) => {
 
+    console.log(data)
     data = data.filter( (d) => {return d['Date'] === "Jan 2018"});
+    console.log(data)
 
     stackdata = race.map(function(c) {
+      console.log(c)
     return data.map(function(d,i) {
+      console.log(d)
       return {x:i, y:d[c]} })
     })
-<<<<<<< HEAD
 
-=======
-    console.log(data)
     console.log(stackdata)
->>>>>>> 615ad0ccc2d5f3c12ea83062d817ac49f434189e
-  var svg = d3.select("body")
-    .append("svg")
-    .attr("width", 250)
-    .attr("height", 250)
+
+  // var svg = d3.select("body")
+  //   .append("svg")
+  //   .attr("width", 250)
+  //   .attr("height", 250)
   // Set up stack method
   var stack = d3.stack()
   // Data, stacked
