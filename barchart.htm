@@ -1,0 +1,65 @@
+<html>
+    <head>
+        <script src="https://d3js.org/d3.v6.min.js"></script>  
+    </head>
+    <body>
+        <!-- create svg -->
+        <svg id="stackedBar" height="300" width = "600"></svg>
+
+        <!-- get data -->
+        <script>
+            svg = d3.select("svg#stackedBar");
+
+            //get height and width
+            var height = svg.attr("height")
+            var width = svg.attr("width")
+
+            //create margins and adjust chart
+            const margins = {"top": 10, "right": 10, "bottom": 10, "left": 10}; 
+            const chartWidth = width - margins.left - margins.right;
+            const chartHeight = height - margins.top - margins.bottom;
+
+            //get color scales
+            // used optimization tool: http://vrl.cs.brown.edu/color
+            var colors = ["#d25c4d", "#f2b447", "#d9d574", '#e41a1c','#377eb8','#4daf4a'];
+            //var genderColor = ["blue", "pink"]
+
+            //get barchart area
+            let stackedBar = svg.append("g")
+                    .attr("transform","translate("+margins.left+","+margins.top+")");
+            
+            //get data
+            d3.csv("group_company_final.csv", d3.autoType)
+                .then((data) => {
+
+                    // filter to just get 1 year
+                    data = data.filter( (d) => {return d['Date'] === "Jan 2018"});
+                    console.log(data)
+
+                    //get race and gender
+                    var race = [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "]
+                    // var gender = [" Male % ", " Female % "]
+
+                    //loop through each company
+                    data.forEach ((d,i) => {
+                        var newHeight = height
+
+                        // loop through each race
+                        race.forEach((race, spot) => {
+                            //append rectangle
+                            stackedBar.append("line")
+                                    .attr("x1", i*40)
+                                    .attr("y1", newHeight)
+                                    .attr("y2", newHeight- d[race])
+                                    .attr("x2", i*40)
+                                    .attr("stroke", colors[spot])
+                                    .attr("stroke-width", 20);
+                                    // console.log(d[race])
+                                newHeight = newHeight - d[race]
+                        });
+                    });
+                });
+        </script>
+    </body>
+
+</html>
