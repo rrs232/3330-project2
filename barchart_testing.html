@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title> INFO 3300 - Project 2</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+
+    <style>
+
+      .svgs {
+        display: flex;
+        flex-direction: row;
+      }
+
+    </style>
+
+  </head>
+    <body>
+
+        <!-- create legend -->
+        <svg id="legend" height="20" width ="600"></svg>
+
+        <!-- create buttons -->
+        <div id="button-bar"></div>
+
+        <!-- create svg -->
+        <div class= 'svgs'>
+          <svg id="stackedBar" height="400" width = "600"></svg>
+          <svg id="positionBar" height="400" width = "600"></svg>
+        </div>
+
+        <!-- create hover -->
+        <div id="label"></div>
+
+        <!-- get data -->
+        <script>
+            let svg = d3.select("svg#stackedBar");
+            let psvg = d3.select("svg#positionBar");
+
+            //get height and width
+            var height = svg.attr("height")
+            var width = svg.attr("width")
+
+
+
+            //create margins and adjust chart
+            const margins = {"top": 10, "right": 50, "bottom": 10, "left": 50};
+            const chartWidth = width - margins.left - margins.right;
+            const chartHeight = height - margins.top - margins.bottom;
+
+
+            //get color scales
+            // used optimization tool: http://vrl.cs.brown.edu/color
+            var colorOptions = { "Race": ["rgb(57,146,131)", "rgb(117,213,225)", "rgb(14,80,62)", "rgb(127,235,144)", "rgb(151,18,123)", "rgb(218,167,231)"], "Gender": ["blue", "pink"] };
+            //var genderColor = ["blue", "pink"]
+            var key = ["Race", "Gender"];
+            var keys = { "Race": [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "], "Gender": [" Male % ", " Female % "]};
+
+            //get barchart area
+            let annotations = svg.append("g").attr("id","annotations");
+            let stackedBar = svg.append("g")
+                    .attr("transform","translate("+margins.left+","+margins.top+")");
+
+            // create axis
+            const percentScale = d3.scaleLinear().domain([0,1]).range([chartHeight, 0]);
+            let leftAxis = d3.axisLeft(percentScale).tickFormat(d3.format('.0%'));
+
+            annotations.append("g")
+                       .attr("class", "y axis")
+                       .attr("transform",`translate(${margins.left-10},${margins.top})`)
+                       .call(leftAxis)
+
+            //get data
+            d3.csv("group_company_final2.csv", d3.autoType)
+                .then((data) => {
+
+                    // console.log(data)
+
+                    const requestData = async () => {
+
+                      const pData = await d3.csv("eeo1-2015-2016.csv");
+
+                      let positionData = pData.filter( (d) => {return (d['company'] === "Apple" || d['company'] === "Cisco" || d['company'] === "Facebook" || d['company'] === "Google" || d['company'] === "Intel" || d['company'] === "LinkedIn" || d['company'] === "Nvidia" || d['company'] === "Pinterest" || d['company'] === "Salesforce" || d['company'] === "Twitter" || d['company'] === "Uber" || d['company'] === "Ebay") });
+                      positionData.forEach( (d,i) => {
+                        d['year'] = Number(d['Year']);
+                        d['count'] = Number(d['count']);
+                      });
+                      positionData = positionData.filter( (d) => {return d['year'] = 2016});
+
+                      const positions = d3.map(positionData, d => d.job_category)
+                      var distinctP = new Set(positions)
+
+                      const prace = d3.map(positionData, d => d.race)
+                      const distinctRace = new Set(prace)
+
+                      const r1tor2 = {" % White ": "White", " % Asian ": "Asian", " % Latino ": "Hispanic_or_Latino", " % Black ": "Black_or_African_American", " % Multi ": "Two_or_more_races", " % Undeclared ": "test"}
+                      console.log(r1tor2[" % White "])
+                      // filter to just get 1 year
+                      data = data.filter( (d) => {return d['Date'] === "Jan 2018"});
+
+                      const companies = d3.map(data, d => d.company);
+                      console.log(companies)
+
+                      let racedatastructure = {};
+                      companies.forEach ( (c) => {
+                        let positionStructure = {};
+                        distinctP.forEach( (p) => {
+                          let raceStructure = {};
+                          distinctRace.forEach( (r) => {
+                            let rdata = positionData.filter( (d) => {return d['job_category'] === p && d['company'] === c && d['race'] === r});
+                            let count = 0;
+                            rdata.forEach( (rd) => {
+                              count = count + rd['count']
+                            });
+                            raceStructure[r] = count;
+                          });
+                          positionStructure[p] = raceStructure;
+                        });
+                        racedatastructure[c] = positionStructure;
+                      });
+                      console.log(racedatastructure)
+
+                      let distinctGender = ['male', 'female']
+                      let genderdatastructure = {};
+                      companies.forEach ( (c) => {
+                        let positionStructure = {};
+                        distinctP.forEach( (p) => {
+                          let genderStructure = {};
+                          distinctGender.forEach( (r) => {
+                            let rdata = positionData.filter( (d) => {return d['job_category'] === p && d['company'] === c && d['gender'] === r});
+                            let count = 0;
+                            rdata.forEach( (rd) => {
+                              count = count + rd['count']
+                            });
+                            genderStructure[r] = count;
+                          });
+                          positionStructure[p] = genderStructure;
+                        });
+                        genderdatastructure[c] = positionStructure;
+                      });
+
+                      let pDataStructure = {'Race': racedatastructure, 'Gender': genderdatastructure};
+
+                      const companyScale = d3.scaleBand().domain(companies).range([0, chartWidth])
+                                                       .padding(0.05);
+
+
+                      let bottomAxis = d3.axisBottom(companyScale).tickFormat(d3.format('~f'));
+                      annotations.append("g")
+                                 .attr("class", "x axis")
+                                 .attr("transform",`translate(${margins.left},${chartHeight+margins.top+10})`)
+                                 .call(bottomAxis);
+
+                      const barScale = d3.scaleLinear().domain([0,11]).range([margins.left, chartWidth-margins.right])
+
+                      const heightScale = d3.scaleLinear().domain([0,1]).range([0, chartHeight])
+
+                      function secondGraph(filterType, company, race) {
+                        var pheight = psvg.attr("height")
+                        var pwidth = psvg.attr("width")
+
+                        const pmargins = {"top": 10, "right": 50, "bottom": 10, "left": 50};
+                        const pchartWidth = pwidth - pmargins.left - pmargins.right;
+                        const pchartHeight = pheight - pmargins.top - pmargins.bottom;
+
+                        let pannotations = psvg.append("g").attr("id","annotations");
+                        let pBar = psvg.append("g")
+                                .attr("transform","translate("+pmargins.left+","+pmargins.top+")");
+
+                        let ds = pDataStructure[filterType];
+                        let cd = ds[company];
+                        console.log(distinctP)
+                        let newDistinctP = ["Executives", "Managers", "Professionals", "Technicians", "Sales workers", "Administrative support", "Craft workers", "operatives", "laborers and helpers", "Service workers"];
+
+                        const pbarScale = d3.scaleLinear().domain([0, 9]).range([pmargins.left, pchartWidth-pmargins.right])
+
+                        // console.log(cd)
+                        let count_list = []
+                        console.log(race)
+                        newDistinctP.forEach( (d,i) => {
+                          x = cd[d][race];
+                          console.log(x)
+                          count_list.push(x)
+                        });
+
+                        let min = Math.min(...count_list);
+                        let max = Math.max(...count_list);
+                        console.log(min)
+                        console.log(max)
+                        const countScale = d3.scaleLinear().domain([min, max]).range([pchartHeight, 0]);
+                        let pleftAxis = d3.axisLeft(countScale).tickFormat(d3.format('~f'));
+                        pannotations.append("g")
+                                     .attr("class", "y axis")
+                                     .attr("transform",`translate(${pmargins.left-10},${pmargins.top})`)
+                                     .call(pleftAxis);
+
+                        const positionScale = d3.scaleBand().domain(distinctP).range([0, pchartWidth])
+                                                          .padding(0.05);
+
+                        let pbottomAxis = d3.axisBottom(positionScale).tickFormat(d3.format('~f'));
+                        pannotations.append("g")
+                                   .attr("class", "x axis")
+                                   .attr("transform",`translate(${pmargins.left},${pchartHeight+pmargins.top+10})`)
+                                   .call(pbottomAxis);
+
+                        newDistinctP.forEach( (d,i) => {
+                          // countScale()
+                          // console.log(cd[d][race])
+                          // console.log(d)
+                          let circle = pannotations.append("circle")
+                                            .attr('cx', pbarScale(i))
+                                            .attr('cy', countScale(cd[d][race]))
+                                            .attr('r', '5')
+                                            .attr('fill', 'green');
+                        });
+
+                      };
+
+                      function updateBarsAnimated(filterType) {
+
+                        let ft = keys[filterType];
+                        let colors = colorOptions[filterType];
+                        //loop through each company
+                        data.forEach ((d,i) => {
+                          // console.log(d)
+                          var newHeight = chartHeight
+                          // loop through each race
+                          let companyRect = stackedBar.append('g')
+                                                      .attr('label', d.company);
+                                                      // .attr('x', barScale(i)-10)
+                                                      // .attr('y', 0)
+                                                      // .attr('width', 20)
+                                                      // .attr('height', chartHeight)
+                                                      // .attr('label', d.company);
+
+                          ft.forEach((race, spot) => {
+                            let r = r1tor2[race];
+                            //append rectangle
+                            let line = companyRect.append("line")
+                                                  .attr("x1", barScale(i))
+                                                  .attr("y1", newHeight)
+                                                  .attr("y2", newHeight- ((d[race])/100)*chartHeight)
+                                                  .attr("x2", barScale(i))
+                                                  .attr("stroke", colors[spot])
+                                                  .attr("stroke-width", 20)
+                                                  .attr("label", race);
+
+                            newHeight = newHeight - ((d[race])/100)*chartHeight;
+
+                            // companyRect.on('mouseover', function() {
+                            //   // console.log("clicked!")
+                            //   // console.log(d.company)
+                            //   // console.log(r)
+                            //   console.log(this)
+                            //   secondGraph(filterType, d.company, r1tor2[race]);
+                            // });
+
+                            line.on("mouseover", function() {
+
+                              d3.select(this)
+                                  .transition().duration(200)
+                                  .attr("stroke-width", 30);
+
+                              d3.select("#label")
+                                .text(race+": "+d[race]+"%");
+
+                              secondGraph(filterType, d.company, r1tor2[race]);
+                            });
+
+                            line.on("mouseout", function() {
+
+                              d3.select(this)
+                                  .transition().duration(200)
+                                  .attr("stroke-width", 20);
+
+                              d3.select("#label")
+                                .text("");
+
+                              psvg.selectAll("*").remove();
+                            });
+                            // console.log(r)
+
+
+                          });
+
+                        });
+
+                      };
+
+                      function updateLegend(filterType) {
+                        let legend = d3.select("svg#legend");
+
+                        let legWidth = legend.attr('width');
+                        let legHeight = legend.attr('height')
+                        legend.selectAll("text").remove();
+                        legend.selectAll("rect").remove();
+
+                        let ft = keys[filterType];
+                        let colors = colorOptions[filterType];
+
+                        const legendRectScale = d3.scaleLinear().domain([0, ft.length]).range([0, legWidth-20])
+                        const legendTextScale = d3.scaleLinear().domain([0, ft.length]).range([20, legWidth])
+                        ft.forEach( (d,i)  => {
+                          let color = colors[i];
+                          let rectangle = legend.append("rect")
+                                                .attr('x', legendRectScale(i))
+                                                .attr('y', 5)
+                                                .attr('width', legHeight-5)
+                                                .attr('height', legHeight-5)
+                                                .attr('fill', color);
+                          let text = legend.append("text")
+                                            .text(d)
+                                            .attr('x', legendTextScale(i))
+                                            .attr('y', legHeight)
+                                            .attr('fill', color);
+
+                        });
+
+                      }
+
+                      // updateBarsAnimated("Race");
+
+
+                      key.forEach( d => {
+                          // For each year key, add a new button to the button bar
+                          d3.select("div#button-bar")
+                            .append("button")
+                            .text( d )
+                            .on("click", function() {
+                              // When it's clicked, call updateBars to update the chart
+                              updateBarsAnimated( d );
+                              updateLegend( d );
+                            })
+                        });
+
+                        updateBarsAnimated("Race");
+                        updateLegend("Race");
+
+                    };
+                    requestData();
+                });
+
+
+        </script>
+    </body>
+
+</html>
