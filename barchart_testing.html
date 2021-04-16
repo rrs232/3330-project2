@@ -218,6 +218,7 @@
 
                       function updateBarsAnimated(filterType) {
 
+                        svg.selectAll("line").remove();
                         let ft = keys[filterType];
                         let colors = colorOptions[filterType];
                         //loop through each company
@@ -247,14 +248,6 @@
 
                             newHeight = newHeight - ((d[race])/100)*chartHeight;
 
-                            // companyRect.on('mouseover', function() {
-                            //   // console.log("clicked!")
-                            //   // console.log(d.company)
-                            //   // console.log(r)
-                            //   console.log(this)
-                            //   secondGraph(filterType, d.company, r1tor2[race]);
-                            // });
-
                             line.on("mouseover", function() {
 
                               d3.select(this)
@@ -278,8 +271,6 @@
 
                               psvg.selectAll("*").remove();
                             });
-                            // console.log(r)
-
 
                           });
 
