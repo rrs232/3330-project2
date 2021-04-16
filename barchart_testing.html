@@ -44,7 +44,7 @@
 
 
             //create margins and adjust chart
-            const margins = {"top": 10, "right": 50, "bottom": 10, "left": 50};
+            const margins = {"top": 10, "right": 50, "bottom": 80, "left": 50};
             const chartWidth = width - margins.left - margins.right;
             const chartHeight = height - margins.top - margins.bottom;
 
@@ -59,7 +59,7 @@
             //get barchart area
             let annotations = svg.append("g").attr("id","annotations");
             let stackedBar = svg.append("g")
-                    .attr("transform","translate("+margins.left+","+margins.top+")");
+                    .attr("transform","translate(25,"+margins.top+")");
 
             // create axis
             const percentScale = d3.scaleLinear().domain([0,1]).range([chartHeight, 0]);
@@ -67,7 +67,7 @@
 
             annotations.append("g")
                        .attr("class", "y axis")
-                       .attr("transform",`translate(${margins.left-10},${margins.top})`)
+                       .attr("transform",`translate(${margins.left},${margins.top})`)
                        .call(leftAxis)
 
             //get data
@@ -100,6 +100,7 @@
 
                       const companies = d3.map(data, d => d.company);
                       console.log(companies)
+
 
                       let racedatastructure = {};
                       companies.forEach ( (c) => {
@@ -141,15 +142,21 @@
 
                       let pDataStructure = {'Race': racedatastructure, 'Gender': genderdatastructure};
 
-                      const companyScale = d3.scaleBand().domain(companies).range([0, chartWidth])
+                      const companyScale = d3.scaleBand().domain(companies).range([0, chartWidth-margins.right])
                                                        .padding(0.05);
 
 
-                      let bottomAxis = d3.axisBottom(companyScale).tickFormat(d3.format('~f'));
+                      let bottomAxis = d3.axisBottom(companyScale);
                       annotations.append("g")
-                                 .attr("class", "x axis")
-                                 .attr("transform",`translate(${margins.left},${chartHeight+margins.top+10})`)
-                                 .call(bottomAxis);
+                                   .attr("class", "x axis")
+                                   .attr("transform",`translate(${margins.left},${chartHeight+margins.top+10})`)
+                                   .call(bottomAxis)
+                                  .selectAll("text")
+                                    .attr("y", 0)
+                                    .attr("x", 9)
+                                    .attr("dy", ".35em")
+                                    .attr("transform", "rotate(90)")
+                                    .style("text-anchor", "start");
 
                       const barScale = d3.scaleLinear().domain([0,11]).range([margins.left, chartWidth-margins.right])
 
@@ -159,7 +166,7 @@
                         var pheight = psvg.attr("height")
                         var pwidth = psvg.attr("width")
 
-                        const pmargins = {"top": 10, "right": 50, "bottom": 10, "left": 50};
+                        const pmargins = {"top": 10, "right": 50, "bottom": 50, "left": 50};
                         const pchartWidth = pwidth - pmargins.left - pmargins.right;
                         const pchartHeight = pheight - pmargins.top - pmargins.bottom;
 
@@ -197,16 +204,13 @@
                         const positionScale = d3.scaleBand().domain(distinctP).range([0, pchartWidth])
                                                           .padding(0.05);
 
-                        let pbottomAxis = d3.axisBottom(positionScale).tickFormat(d3.format('~f'));
+                        let pbottomAxis = d3.axisBottom(positionScale);
                         pannotations.append("g")
                                    .attr("class", "x axis")
                                    .attr("transform",`translate(${pmargins.left},${pchartHeight+pmargins.top+10})`)
                                    .call(pbottomAxis);
 
                         newDistinctP.forEach( (d,i) => {
-                          // countScale()
-                          // console.log(cd[d][race])
-                          // console.log(d)
                           let circle = pannotations.append("circle")
                                             .attr('cx', pbarScale(i))
                                             .attr('cy', countScale(cd[d][race]))
@@ -308,9 +312,6 @@
                         });
 
                       }
-
-                      // updateBarsAnimated("Race");
-
 
                       key.forEach( d => {
                           // For each year key, add a new button to the button bar
