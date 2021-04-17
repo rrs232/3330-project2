@@ -208,14 +208,21 @@
                                      .attr("transform",`translate(${pmargins.left-10},${pmargins.top})`)
                                      .call(pleftAxis);
 
-                        const positionScale = d3.scaleBand().domain(distinctP).range([0, pchartWidth])
+                        const positionScale = d3.scaleBand().domain(newDistinctP).range([0, pchartWidth])
                                                           .padding(0.05);
 
                         let pbottomAxis = d3.axisBottom(positionScale);
                         pannotations.append("g")
-                                   .attr("class", "x axis")
-                                   .attr("transform",`translate(${pmargins.left},${pchartHeight+pmargins.top+10})`)
-                                   .call(pbottomAxis);
+                                     .attr("class", "x axis")
+                                     .attr("transform",`translate(${pmargins.left},${pchartHeight+pmargins.top+10})`)
+                                     .call(pbottomAxis)
+                                   .selectAll("text")
+                                     .attr("y", 0)
+                                     .attr("x", 9)
+                                     .attr("dy", ".1em")
+                                     .attr("transform", "rotate(90)")
+                                     .style('font-size', 6)
+                                     .style("text-anchor", "start");
 
                         newDistinctP.forEach( (d,i) => {
                           let circle = pannotations.append("circle")
