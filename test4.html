@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title> INFO 3300 - Project 2</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+
+    <style>
+
+      .svgs {
+        display: flex;
+        flex-direction: row;
+      }
+
+      img{
+        width: 40%;
+        display: block;
+      }
+
+    </style>
+
+  </head>
+    <body>
+        <!-- create pie chart -->
+        <svg id="pieChart" height ="400" width="600"></svg>
+        <!-- get data -->
+        <script>
+             //get height and width
+
+
+
+            //create margins and adjust chart
+            // const margins = {"top": 10, "right": 50, "bottom": 80, "left": 50};
+            // const chartWidth = width - margins.left - margins.right;
+            // const chartHeight = height - margins.top - margins.bottom;
+
+
+            var key = ["Race", "Gender"];
+            var keys = { "Race": [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "], "Gender": [" Male % ", " Female % "]};
+
+        
+            //get data
+            d3.csv("group_company_final.csv", d3.autoType)
+                .then((data) => {
+
+                    // console.log(data)
+            
+
+                    const requestData = async () => {
+
+                      const pData = await d3.csv("eeo1-2015-2016.csv");
+                      // console.log(pData)
+
+                      let positionData = pData.filter( (d) => {return (d['company'] === "Apple" || d['company'] === "Cisco" || d['company'] === "Facebook" || d['company'] === "Google" || d['company'] === "Intel" || d['company'] === "LinkedIn" || d['company'] === "Nvidia" || d['company'] === "Pinterest" || d['company'] === "Salesforce" || d['company'] === "Twitter" || d['company'] === "Uber" || d['company'] === "Ebay") });
+                      positionData.forEach( (d,i) => {
+                        d['year'] = Number(d['Year']);
+                        d['count'] = Number(d['count']);
+                      });
+                      positionData = positionData.filter( (d) => {return d['year'] = 2016});
+
+                      const positions = d3.map(positionData, d => d.job_category)
+                      var distinctP = new Set(positions)
+
+                      const prace = d3.map(positionData, d => d.race)
+                      const distinctRace = new Set(prace)
+
+                      const r1tor2 = {" % White ": "White", " % Asian ": "Asian", " % Latino ": "Hispanic_or_Latino", " % Black ": "Black_or_African_American", " % Multi ": "Two_or_more_races", " % Undeclared ": "test"}
+                      console.log(r1tor2[" % White "])
+                      // filter to just get 1 year
+                      data = data.filter( (d) => {return d['Date'] === "Jan 2018"});
+
+                      const companies = d3.map(data, d => d.company);
+                      console.log(companies)
+
+
+                      let racedatastructure = {};
+                      companies.forEach ( (c) => {
+                        let positionStructure = {};
+                        distinctP.forEach( (p) => {
+                          let raceStructure = {};
+                          distinctRace.forEach( (r) => {
+                            let rdata = positionData.filter( (d) => {return d['job_category'] === p && d['company'] === c && d['race'] === r});
+                            let count = 0;
+                            rdata.forEach( (rd) => {
+                              count = count + rd['count']
+                            });
+                            raceStructure[r] = count;
+                          });
+                          positionStructure[p] = raceStructure;
+                        });
+                        racedatastructure[c] = positionStructure;
+                      });
+                      console.log(racedatastructure)
+
+                      let distinctGender = ['male', 'female']
+                      let genderdatastructure = {};
+                      companies.forEach ( (c) => {
+                        let positionStructure = {};
+                        distinctP.forEach( (p) => {
+                          let genderStructure = {};
+                          distinctGender.forEach( (r) => {
+                            let rdata = positionData.filter( (d) => {return d['job_category'] === p && d['company'] === c && d['gender'] === r});
+                            let count = 0;
+                            rdata.forEach( (rd) => {
+                              count = count + rd['count']
+                            });
+                            genderStructure[r] = count;
+                          });
+                          positionStructure[p] = genderStructure;
+                        });
+                        genderdatastructure[c] = positionStructure;
+                      });
+
+                      let pDataStructure = {'Race': racedatastructure, 'Gender': genderdatastructure};
+
+                    //   const companyScale = d3.scaleBand().domain(companies).range([0, chartWidth-margins.right])
+                    //                                    .padding(0.05);
+
+                    
+                    // create pi chart
+                    var width = 450
+    height = 450
+    margin = 40
+
+// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+var radius = Math.min(width, height) / 2 - margin
+var newData = {American_Indian_Alaskan_Native: 0, Asian: 6, Black_or_African_American: 1, Hispanic_or_Latino: 0, Native_Hawaiian_or_Pacific_Islander: 0, Overall_totals: 31, Two_or_more_races: 0, White: 24}
+
+    var svg = d3.select("#pieChart")
+    .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+    .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    // Create dummy data
+    // var data = {a: 9, b: 20, c:30, d:8, e:12}
+
+    // set the color scale
+    var color = d3.scaleOrdinal()
+    .domain(data)
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
+
+    // Compute the position of each group on the pie:
+    var pie = d3.pie()
+    .value(function(d) {return d.value; })
+    var data_ready = pie(d3.entries(newData))
+
+    // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+    svg
+    .selectAll('whatever')
+    .data(data_ready)
+    .enter()
+    .append('path')
+    .attr('d', d3.arc()
+        .innerRadius(0)
+        .outerRadius(radius)
+    )
+    .attr('fill', function(d){ return(color(d.newData.key)) })
+    .attr("stroke", "black")
+    .style("stroke-width", "2px")
+    .style("opacity", 0.7)
+
+
+                    };
+                    requestData();
+                });
+
+
+        </script>
+    </body>
+
+</html>
