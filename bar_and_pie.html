@@ -31,11 +31,9 @@
         <div id="button-bar"></div>
 
         <!-- create svg -->
-        <div class= 'svgs'>
+        <div class= 'svgs' id = 'svgs'>
           <svg id="stackedBar" height="400" width = "600"></svg>
-          <svg id="positionBar" height="400" width = "600"></svg>
         </div>
-        <div id="my_dataviz"></div>
 
         <!-- create hover -->
         <div id="label"></div>
@@ -43,13 +41,10 @@
         <!-- get data -->
         <script>
             let svg = d3.select("svg#stackedBar");
-            let psvg = d3.select("svg#positionBar");
 
             //get height and width
             var height = svg.attr("height")
             var width = svg.attr("width")
-
-
 
             //create margins and adjust chart
             const margins = {"top": 10, "right": 50, "bottom": 80, "left": 50};
@@ -60,7 +55,7 @@
             //get color scales
             // used optimization tool: http://vrl.cs.brown.edu/color
             var colorOptions = { "Race": ["rgb(57,146,131)", "rgb(117,213,225)", "rgb(14,80,62)", "rgb(127,235,144)", "rgb(151,18,123)", "rgb(218,167,231)"], "Gender": ["blue", "pink"] };
-            //var genderColor = ["blue", "pink"]
+            var colorOptions2 = { "Race": ["rgb(14,80,62)", "rgb(57,146,131)", "rgb(127,235,144)", "rgb(117,213,225)", "rgb(151,18,123)"], "Gender": ["blue", "pink"] };
             var key = ["Race", "Gender"];
             var keys = { "Race": [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "], "Gender": [" Male % ", " Female % "]};
 
@@ -102,7 +97,7 @@
                       const prace = d3.map(positionData, d => d.race)
                       const distinctRace = new Set(prace)
 
-                      const r1tor2 = {" % White ": "White", " % Asian ": "Asian", " % Latino ": "Hispanic_or_Latino", " % Black ": "Black_or_African_American", " % Multi ": "Two_or_more_races", " % Undeclared ": "test"}
+                      const r1tor2 = {" % White ": "White", " % Asian ": "Asian", " % Latino ": "Hispanic_or_Latino", " % Black ": "Black_or_African_American", " % Multi ": "Two_or_more_races"}
                       // console.log(r1tor2[" % White "])
                       // filter to just get 1 year
                       data = data.filter( (d) => {return d['Date'] === "Jan 2018"});
@@ -150,7 +145,7 @@
                       });
 
                       let pDataStructure = {'Race': racedatastructure, 'Gender': genderdatastructure};
-                      console.log(pDataStructure['Race']['Apple']['Executives'])
+                      // console.log(pDataStructure['Race']['Apple']['Executives'])
 
                       const companyScale = d3.scaleBand().domain(companies).range([5, chartWidth-margins.right])
                                                        .padding(0.05);
@@ -172,67 +167,54 @@
 
                       const heightScale = d3.scaleLinear().domain([0,1]).range([0, chartHeight])
 
-                      function secondGraph(filterType, company, race) {
-                        var pheight = psvg.attr("height")
-                        var pwidth = psvg.attr("width")
+                      function pieChart(filterType, company) {
 
-                        const pmargins = {"top": 10, "right": 50, "bottom": 50, "left": 50};
-                        const pchartWidth = pwidth - pmargins.left - pmargins.right;
-                        const pchartHeight = pheight - pmargins.top - pmargins.bottom;
+                        var data = pDataStructure[filterType][company]['Executives']
 
-                        let pannotations = psvg.append("g").attr("id","annotations");
-                        let pBar = psvg.append("g")
-                                .attr("transform","translate("+pmargins.left+","+pmargins.top+")");
+                        var pwidth = 600
+                        var pheight = 400
+                        var pmargin = 40
 
-                        let ds = pDataStructure[filterType];
-                        let cd = ds[company];
-                        let newDistinctP = ["Executives", "Managers", "Professionals", "Technicians", "Sales workers", "Administrative support", "Craft workers", "operatives", "laborers and helpers", "Service workers"];
+                        var radius = Math.min(pwidth, pheight) / 2 - pmargin
 
-                        const pbarScale = d3.scaleLinear().domain([0, 9]).range([pmargins.left, pchartWidth-pmargins.right])
+                        var svg = d3.select("#svgs")
+                          .append("svg")
+                            .attr("width", pwidth)
+                            .attr("height", pheight)
+                            .attr('id', 'pie')
+                          .append("g")
+                            .attr("transform", "translate(" + pwidth / 2 + "," + pheight / 2 + ")");
 
-                        // console.log(cd)
-                        let count_list = []
-                        // console.log(race)
-                        newDistinctP.forEach( (d,i) => {
-                          x = cd[d][race];
-                          // console.log(x)
-                          count_list.push(x)
+                        var color = d3.scaleOrdinal(colorOptions2[filterType]);
+                        var pie = d3.pie()
+                          .value(function(d) {return d.value; })
+
+                        var mapped = [];
+                        Object.keys(data).forEach( d => {
+                          if (d !== "Overall_totals" && d !== "Native_Hawaiian_or_Pacific_Islander" && d !== "American_Indian_Alaskan_Native") {
+                            var map = {}
+                            map.key = d;
+                            map.value = data[d];
+                            mapped.push(map);
+                          }
                         });
 
-                        let min = Math.min(...count_list);
-                        let max = Math.max(...count_list);
-                        // console.log(min)
-                        // console.log(max)
-                        const countScale = d3.scaleLinear().domain([min, max]).range([pchartHeight, 0]);
-                        let pleftAxis = d3.axisLeft(countScale).tickFormat(d3.format('~f'));
-                        pannotations.append("g")
-                                     .attr("class", "y axis")
-                                     .attr("transform",`translate(${pmargins.left-10},${pmargins.top})`)
-                                     .call(pleftAxis);
+                        var data_ready = pie(mapped)
 
-                        const positionScale = d3.scaleBand().domain(newDistinctP).range([0, pchartWidth])
-                                                          .padding(0.05);
-
-                        let pbottomAxis = d3.axisBottom(positionScale);
-                        pannotations.append("g")
-                                     .attr("class", "x axis")
-                                     .attr("transform",`translate(${pmargins.left},${pchartHeight+pmargins.top+10})`)
-                                     .call(pbottomAxis)
-                                   .selectAll("text")
-                                     .attr("y", 0)
-                                     .attr("x", 9)
-                                     .attr("dy", ".1em")
-                                     .attr("transform", "rotate(90)")
-                                     .style('font-size', 6)
-                                     .style("text-anchor", "start");
-
-                        newDistinctP.forEach( (d,i) => {
-                          let circle = pannotations.append("circle")
-                                            .attr('cx', pbarScale(i))
-                                            .attr('cy', countScale(cd[d][race]))
-                                            .attr('r', '5')
-                                            .attr('fill', 'green');
-                        });
+                        let test = svg
+                          .selectAll('whatever')
+                          .data(data_ready)
+                          .enter()
+                          .append('path')
+                          .attr('d', d3.arc()
+                            .innerRadius(0)
+                            .outerRadius(radius)
+                          )
+                          .attr('fill', function(d){ return(color(d.data.key)) })
+                          .attr("stroke", "black")
+                          .attr("id", d => d.data.key)
+                          .style("stroke-width", "2px")
+                          .style("opacity", 0.7);
 
                       };
 
@@ -248,49 +230,49 @@
                           // loop through each race
                           let companyRect = stackedBar.append('g')
                                                       .attr('label', d.company);
-                                                      // .attr('x', barScale(i)-10)
-                                                      // .attr('y', 0)
-                                                      // .attr('width', 20)
-                                                      // .attr('height', chartHeight)
-                                                      // .attr('label', d.company);
 
                           ft.forEach((race, spot) => {
-                            let r = r1tor2[race];
-                            //append rectangle
-                            let line = companyRect.append("line")
-                                                  .attr("x1", barScale(i))
-                                                  .attr("y1", newHeight)
-                                                  .attr("y2", newHeight- ((d[race])/100)*chartHeight)
-                                                  .attr("x2", barScale(i))
-                                                  .attr("stroke", colors[spot])
-                                                  .attr("stroke-width", 20)
-                                                  .attr("label", race);
+                            if (race !== " % Undeclared ") {
+                              let r = r1tor2[race];
+                              // console.log(r)
+                              //append rectangle
+                              let line = companyRect.append("line")
+                                                    .attr("x1", barScale(i))
+                                                    .attr("y1", newHeight)
+                                                    .attr("y2", newHeight- ((d[race])/100)*chartHeight)
+                                                    .attr("x2", barScale(i))
+                                                    .attr("stroke", colors[spot])
+                                                    .attr("stroke-width", 20)
+                                                    .attr("label", race);
 
-                            newHeight = newHeight - ((d[race])/100)*chartHeight;
+                              newHeight = newHeight - ((d[race])/100)*chartHeight;
 
-                            line.on("mouseover", function() {
+                              companyRect.on("click", function() {
+                                d3.select("svg#pie").remove();
+                                pieChart(filterType, d.company);
+                              });
 
-                              d3.select(this)
-                                  .transition().duration(200)
-                                  .attr("stroke-width", 30);
+                              line.on("mouseover", function() {
 
-                              d3.select("#label")
-                                .text(race+": "+d[race]+"%");
+                                d3.select(this)
+                                    .transition().duration(200)
+                                    .attr("stroke-width", 30);
 
-                              secondGraph(filterType, d.company, r1tor2[race]);
-                            });
+                                d3.select("#label")
+                                  .text(race+": "+d[race]+"%");
+                              });
 
-                            line.on("mouseout", function() {
+                              line.on("mouseout", function() {
 
-                              d3.select(this)
-                                  .transition().duration(200)
-                                  .attr("stroke-width", 20);
+                                d3.select(this)
+                                    .transition().duration(200)
+                                    .attr("stroke-width", 20);
 
-                              d3.select("#label")
-                                .text("");
+                                d3.select("#label")
+                                  .text("");
 
-                              psvg.selectAll("*").remove();
-                            });
+                              });
+                            };
 
                           });
 
@@ -329,48 +311,7 @@
 
                       };
 
-                      function barChart(data) {
-                        var width = 450
-                        var height = 450
-                        var margin = 40
 
-                        var radius = Math.min(width, height) / 2 - margin
-
-                        var svg = d3.select("#my_dataviz")
-                          .append("svg")
-                            .attr("width", width)
-                            .attr("height", height)
-                          .append("g")
-                            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-                        var color = d3.scaleOrdinal(d3.schemeCategory10);
-                        var pie = d3.pie()
-                          .value(function(d) {return d.value; })
-
-                        var mapped = [];
-                        Object.keys(data).forEach( d => {
-                          var map = {}
-                          map.key = d;
-                          map.value = data[d];
-                          mapped.push(map);
-                        });
-
-                        var data_ready = pie(mapped)
-
-                        svg
-                          .selectAll('whatever')
-                          .data(data_ready)
-                          .enter()
-                          .append('path')
-                          .attr('d', d3.arc()
-                            .innerRadius(0)
-                            .outerRadius(radius)
-                          )
-                          .attr('fill', function(d){ return(color(d.data.key)) })
-                          .attr("stroke", "black")
-                          .style("stroke-width", "2px")
-                          .style("opacity", 0.7)
-                      };
 
                       key.forEach( d => {
                           // For each year key, add a new button to the button bar
@@ -386,7 +327,6 @@
 
                         updateBarsAnimated("Race");
                         updateLegend("Race");
-                        barChart(pDataStructure['Race']['Apple']['Executives']);
 
                     };
 
