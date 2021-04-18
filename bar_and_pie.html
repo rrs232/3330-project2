@@ -84,7 +84,7 @@
                       const pData = await d3.csv("eeo1-2015-2016.csv");
                       // console.log(pData)
 
-                      let positionData = pData.filter( (d) => {return (d['company'] === "Apple" || d['company'] === "Cisco" || d['company'] === "Facebook" || d['company'] === "Google" || d['company'] === "Intel" || d['company'] === "LinkedIn" || d['company'] === "Nvidia" || d['company'] === "Pinterest" || d['company'] === "Salesforce" || d['company'] === "Twitter" || d['company'] === "Uber" || d['company'] === "Ebay") });
+                      let positionData = pData.filter( (d) => {return (d['company'] === "Apple" || d['company'] === "Cisco" || d['company'] === "Facebook" || d['company'] === "Google" || d['company'] === "Intel" || d['company'] === "LinkedIn" || d['company'] === "Nvidia" || d['company'] === "Pinterest" || d['company'] === "Salesforce" || d['company'] === "Twitter" || d['company'] === "Uber" || d['company'] === "eBay") });
                       positionData.forEach( (d,i) => {
                         d['year'] = Number(d['Year']);
                         d['count'] = Number(d['count']);
