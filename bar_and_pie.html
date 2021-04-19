@@ -6,29 +6,79 @@
     <script src="https://d3js.org/d3.v6.min.js"></script>
 
     <style>
+    .banner {
+        width: 70%;
+        margin-bottom: 2%;
+        margin-left: auto;
+        margin-right: auto;
+        justify-content: center;
+        height: 200px;
+    }
 
-      .svgs {
+    text {
+        font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
+    }
+
+    .svgs {
         display: flex;
         flex-direction: row;
-      }
+    }
 
-      img{
+    .svgs text {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+    }
+
+    svg text {
+        font-size: 12px;
+    }
+
+    img {
         width: 40%;
         display: block;
-      }
+    }
 
+    .tab {
+        overflow: hidden;
+        border: 2px solid black;
+        background-color: #f1f1f1;
+        margin-bottom: 20px;
+     }
+
+    .tab button {
+        float: left;
+        border: none;
+        outline: none;
+        cursor: default;
+        padding: 10px 20px;
+        transition: 0.2s;
+    }
+
+    .tab button:hover {
+        background-color: #b8b8b8;
+    }
+
+    .tab button.active {
+        background-color: #ccc;
+    }
+
+    .chartlegend {
+        margin-left: 20px;
+    }
     </style>
 
   </head>
     <body>
         <!-- add project logo -->
-        <img src="project-logo.png" alt = "Silicon Valley Project logo">
-
-        <!-- create legend -->
-        <svg id="legend" height="20" width ="600"></svg>
+        <img src="project-logo.png" alt = "Silicon Valley Project logo" class = "banner">
 
         <!-- create buttons -->
-        <div id="button-bar"></div>
+        <div id="button-bar" class = "tab"></div>
+
+        <!-- create legend -->
+        <div class = "chartlegend">
+            <svg id="legend" height="15" width ="500" margins = "10px"></svg>
+        </div>
 
         <!-- create svg -->
         <div class= 'svgs' id = 'svgs'>
@@ -247,7 +297,7 @@
 
                               newHeight = newHeight - ((d[race])/100)*chartHeight;
 
-                              companyRect.on("click", function() {
+                              companyRect.on("mouseover", function() {
                                 d3.select("svg#pie").remove();
                                 pieChart(filterType, d.company);
                               });
