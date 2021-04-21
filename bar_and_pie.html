@@ -29,9 +29,33 @@
         flex-direction: row;
     }
 
+    .company_buttons {
+      background-color: #e7e7e7;
+      text-align: center;
+      /* margin: 30px; */
+      padding-right: 30px;
+      padding-left: 30px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      margin-top: -2%;
+    }
+
     .c_buttons {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
+        flex-wrap: wrap;
+        margin: 5px;
+        font-size: 12px;
+        background-color: inherit;
+        font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
+        border: none;
+        outline: none;
+        padding: 10px 20px;
+        transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #b8b8b8;
     }
 
     .svgs text {
@@ -62,6 +86,7 @@
         cursor: default;
         padding: 10px 20px;
         transition: 0.2s;
+        font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
     }
 
     .tab button:hover {
@@ -75,6 +100,22 @@
     .chartlegend {
         margin-left: 20px;
     }
+
+    .all {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .headers {
+      display: flex;
+      flex-direction: row;
+      margin-top: -2%;
+      width: 75%;
+    }
+
+    .barCaption {
+      margin-right: 20px;
+    }
     </style>
 
   </head>
@@ -85,23 +126,37 @@
         <!-- create buttons -->
         <div id="button-bar" class = "tab"></div>
 
-        <!-- create legend -->
-        <div class = "chartlegend">
-            <svg id="legend" height="15" width ="550"></svg>
-        </div>
-
-        <div class = 'svgandbuttons'>
-        <!-- create svg -->
-          <div class= 'svgs' id = 'svgs'>
-            <svg id="stackedBar" height="400" width = "600"></svg>
+        <div class = 'all'>
+          <!-- create titles -->
+          <div class="headers">
+            <div class= "barCaption">
+              <h3 id= 'barTitle'></h3>
+              <p id= 'barCap'></p>
+            </div>
+            <div class= "pieCaption">
+              <h3 id= 'pieTitle'></h3>
+              <p id= 'pieCap'></p>
+            </div>
           </div>
 
-          <!-- create company buttons -->
-          <div id="company-buttons"></div>
-        </div>
+          <!-- create legend -->
+          <div class = "chartlegend">
+              <svg id="legend" height="15" width ="550"></svg>
+          </div>
 
-        <!-- create hover -->
-        <div id="label"></div>
+          <div class = 'svgandbuttons'>
+          <!-- create svg -->
+            <div class= 'svgs' id = 'svgs'>
+              <svg id="stackedBar" height="400" width = "600"></svg>
+            </div>
+
+            <!-- create company buttons -->
+            <div id="company-buttons" class= "company_buttons"></div>
+          </div>
+
+          <!-- create hover -->
+          <div id="label"></div>
+        </div>
 
         <!-- get data -->
         <script>
@@ -123,6 +178,10 @@
             var colorOptions2 = { "Race": ["#ff6361", "#ffa600", "#58508d", "#003f5c", "#bc5090"], "Gender": ["blue", "pink"] };
             var key = ["Race", "Gender"];
             var keys = { "Race": [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi "], "Gender": [" Male % ", " Female % "]};
+            var barTitles = {'Race': "Breakdown of Employees’ Races in Top Tech Companies", 'Gender': "Breakdown of Employee Gender in Top Tech Companies"}
+            var barCaptions = {'Race': "Compares the proportion of each technology company’s employee body represented by each respective race. Which companies employ the smallest percentage of minorities? Which companies hire a fair representation of employees from all backgrounds?", 'Gender': "Compares the proportion of each technology company’s employee body represented by men and women. While STEM fields continue to be dominated by men, does this trend bleed into the Silicon Valley tech companies?"}
+            // var pieTitles = {'Race': }
+            var pieCaptions = {'Race': 'Is there fair representation of all backgrounds as top executives and senior managers? Looking at the total employee diversity is important, but we must also ensure that there is adequate diversity in the highest ranks and among the decision makers.', 'Gender': 'Is there fair representation of females as top executives and senior managers? In a field still overly represented by men, how many tech change-makers are women?'}
 
             //get barchart area
             let annotations = svg.append("g").attr("id","annotations");
@@ -232,11 +291,20 @@
 
                       function pieChart(filterType, company) {
 
+                        d3.select("svg#default").remove();
+                        d3.select('h3#pieTitle').selectAll('text').remove();
+
+                        let pieTitles = {'Race': 'The Top Executives at '+ company + ' by '+ filterType +'', 'Gender': 'The Top Executives at '+ company + ' by '+ filterType +''};
+                        console.log(pieTitles[filterType])
+                        d3.select('h3#pieTitle').append('text')
+                                                .text(pieTitles[filterType])
+
+
                         var data = pDataStructure[filterType][company]['Executives']
 
                         var pwidth = 600
                         var pheight = 400
-                        var pmargin = 40
+                        var pmargin = 50
 
                         var radius = Math.min(pwidth, pheight) / 2 - pmargin
 
@@ -246,7 +314,7 @@
                             .attr("height", pheight)
                             .attr('id', 'pie')
                           .append("g")
-                            .attr("transform", "translate(" + pwidth / 2 + "," + pheight / 2 + ")");
+                            .attr("transform", "translate(" + (pwidth-3*pmargin) / 2 + "," + (pheight-pmargin) / 2 + ")");
 
                         var color = d3.scaleOrdinal(colorOptions2[filterType]);
                         var pie = d3.pie()
@@ -339,10 +407,6 @@
                                 pieChart(filterType, d.company);
                               });
 
-                              companyRect.on("click", function() {
-                                d3.select("svg#pie").remove();
-                              });
-
 
 
                               line.on("mouseover", function() {
@@ -374,14 +438,24 @@
 
                       function updateLegend(filterType) {
                         let legend = d3.select("svg#legend");
+                        let captions = d3.select('div.headers');
 
                         let legWidth = legend.attr('width');
                         let legHeight = legend.attr('height')
                         legend.selectAll("text").remove();
                         legend.selectAll("rect").remove();
+                        captions.selectAll("text").remove();
+
+
 
                         let ft = keys[filterType];
                         let colors = colorOptions[filterType];
+                        console.log(filterType)
+                        console.log(barTitles[filterType])
+
+                        d3.select('h3#barTitle').append('text').text(barTitles[filterType])
+                        d3.select('p#barCap').append('text').text(barCaptions[filterType])
+                        d3.select('p#pieCap').append('text').text(pieCaptions[filterType])
 
                         const legendRectScale = d3.scaleLinear().domain([0, ft.length]).range([0, legWidth-50])
                         const legendTextScale = d3.scaleLinear().domain([0, ft.length]).range([20, legWidth-40])
@@ -431,12 +505,37 @@
                             .on("click", function() {
                               // When it's clicked, call updateBars to update the chart
                               d3.select("svg#pie").remove();
+                              d3.select("svg#default").remove();
+                              // pieChart(d, 'Apple')
+                              d3.select('div#svgs').append('svg')
+                                                    .attr('id', 'default')
+                                                    .attr('width', 600)
+                                                    .attr('height', 400)
+                                                  .append('circle')
+                                                    .attr('cx', 0)
+                                                    .attr('cy', 0)
+                                                    .attr('r', 150)
+                                                    .style('fill', 'none')
+                                                    .style('stroke', 'black')
+                                                    .attr("transform", "translate(" + (600-3*50) / 2 + "," + (400-50) / 2 + ")");
                               updateBarsAnimated( d );
                               updateLegend( d );
                               updateButtons( d );
                             })
                         });
 
+                        // pieChart('Race', 'Apple')
+                        d3.select('div#svgs').append('svg')
+                                              .attr('id', 'default')
+                                              .attr('width', 600)
+                                              .attr('height', 400)
+                                            .append('circle')
+                                              .attr('cx', 0)
+                                              .attr('cy', 0)
+                                              .attr('r', 150)
+                                              .style('fill', 'none')
+                                              .style('stroke', 'black')
+                                              .attr("transform", "translate(" + (600-3*50) / 2 + "," + (400-50) / 2 + ")");
                         updateBarsAnimated("Race");
                         updateLegend("Race");
                         updateButtons( "Race" );
