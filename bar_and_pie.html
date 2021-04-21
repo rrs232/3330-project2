@@ -24,6 +24,16 @@
         flex-direction: row;
     }
 
+    .svgandbuttons {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .c_buttons {
+        display: flex;
+        flex-direction: row;
+    }
+
     .svgs text {
         font-family: Arial, Helvetica, sans-serif;
         font-size: 10px;
@@ -80,9 +90,14 @@
             <svg id="legend" height="15" width ="550"></svg>
         </div>
 
+        <div class = 'svgandbuttons'>
         <!-- create svg -->
-        <div class= 'svgs' id = 'svgs'>
-          <svg id="stackedBar" height="400" width = "600"></svg>
+          <div class= 'svgs' id = 'svgs'>
+            <svg id="stackedBar" height="400" width = "600"></svg>
+          </div>
+
+          <!-- create company buttons -->
+          <div id="company-buttons"></div>
         </div>
 
         <!-- create hover -->
@@ -248,6 +263,7 @@
                         });
 
                         var data_ready = pie(mapped)
+                        console.log(data_ready)
 
                         let test = svg
                           .selectAll('whatever')
@@ -282,6 +298,7 @@
 
                             d3.select('#race_label').remove('text')
                           });
+
                       };
 
                       function updateBarsAnimated(filterType) {
@@ -321,6 +338,8 @@
                               companyRect.on("click", function() {
                                 d3.select("svg#pie").remove();
                               });
+
+
 
                               line.on("mouseover", function() {
                                 d3.select(this)
@@ -379,10 +398,28 @@
                         });
 
                       };
+                      companies.forEach( d => {
+                        d3.select("div#company-buttons")
+                          .append("button")
+                          .text(d)
+                          .attr('id', d)
+                          .attr('class', 'c_buttons');
+                      });
 
+                      function updateButtons(filterType) {
+                        let cr_buttons = companies.forEach( d => {
+                        d3.select('button#'+d)
+                          .on('click', function() {
+                            d3.select("svg#pie").remove();
+                            pieChart(filterType, d)
+                          });
+                        });
+
+                      };
 
 
                       key.forEach( d => {
+
                           // For each year key, add a new button to the button bar
                           d3.select("div#button-bar")
                             .append("button")
@@ -392,11 +429,13 @@
                               d3.select("svg#pie").remove();
                               updateBarsAnimated( d );
                               updateLegend( d );
+                              updateButtons( d );
                             })
                         });
 
                         updateBarsAnimated("Race");
                         updateLegend("Race");
+                        updateButtons( "Race" );
 
                     };
 
