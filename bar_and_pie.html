@@ -104,8 +104,8 @@
 
             //get color scales
             // used optimization tool: http://vrl.cs.brown.edu/color
-            var colorOptions = { "Race": ["rgb(57,146,131)", "rgb(117,213,225)", "rgb(14,80,62)", "rgb(127,235,144)", "rgb(151,18,123)", "rgb(218,167,231)"], "Gender": ["blue", "pink"] };
-            var colorOptions2 = { "Race": ["rgb(14,80,62)", "rgb(57,146,131)", "rgb(127,235,144)", "rgb(117,213,225)", "rgb(151,18,123)"], "Gender": ["blue", "pink"] };
+            var colorOptions = { "Race": ["#ffa600", "#003f5c", "#ff6361", "#58508d", "#bc5090"], "Gender": ["blue", "pink"] };
+            var colorOptions2 = { "Race": ["#ff6361", "#ffa600", "#58508d", "#003f5c", "#bc5090"], "Gender": ["blue", "pink"] };
             var key = ["Race", "Gender"];
             var keys = { "Race": [" % White ", " % Asian ", " % Latino ", " % Black ", " % Multi ", " % Undeclared "], "Gender": [" Male % ", " Female % "]};
 
@@ -260,7 +260,9 @@
                           )
                           .attr('fill', function(d){ return(color(d.data.key)) })
                           .attr("stroke", "black")
-                          .attr("id", d => d.data.key)
+                          .attr("id", d=> d.data.key + ': ' + Math.round((d.endAngle - d.startAngle)/(2*Math.PI)*100,4) + '%')
+                          //.attr("id", d => (d.data.key + (d.data.endAngle - d.data.startAngle)/(2*Math.PI)*100))
+                          //.attr("id", function(d){ return(d.endAngle - d.startAngle)/(2*Math.PI)*100 })
                           .style("stroke-width", "2px")
                           .style("opacity", 0.7)
                           .on("mouseover", function() {
@@ -271,6 +273,8 @@
                             d3.select('#pie')
                               .append('text')
                               .text(this.id)
+                              //console.log(this.id)
+                              // .text((d.endAngle - d.startAngle)/(2*Math.PI)*100)
                               .attr('id', 'race_label')
                               .attr('transform',`translate(${pmargin},${(pheight-pmargin*5)/2})`)
                               .style('font-family', 'Century Gothic, CenturyGothic, AppleGothic, sans-serif')
