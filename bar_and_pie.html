@@ -367,6 +367,8 @@
                             d3.select('#pie')
                               .append('text')
                               .text(this.id)
+                              .style("text-anchor", "start")
+                              .attr('y', -60)
                               //console.log(this.id)
                               // .text((d.endAngle - d.startAngle)/(2*Math.PI)*100)
                               .attr('id', 'race_label')
