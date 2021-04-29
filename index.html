@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8">
     <title> INFO 3300 - Project 2</title>
-    <script src="https://d3js.org/d3.v6.min.js"></script>
 
     <style>
     /* .banner {
@@ -66,6 +65,10 @@
     svg text {
         font-size: 12px;
     }
+
+    /* #label{
+      transform: rotate(90) !important
+    } */
 
     /* img {
         width: 40%;
@@ -132,6 +135,7 @@
     <body>
         <!-- add project logo -->
         <img src="project-logo1.png" alt = "Silicon Valley Project logo" class = "banner">
+        <script src="https://d3js.org/d3.v6.min.js"></script>
 
         <!-- create buttons -->
         <div id="button-bar" class = "tab"></div>
@@ -158,14 +162,14 @@
           <!-- create svg -->
             <div class= 'svgs' id = 'svgs'>
               <svg id="stackedBar" height="400" width = "600"></svg>
+              <!-- create hover -->
+              <!-- <div id="label"></div> -->
             </div>
 
             <!-- create company buttons -->
             <div id="company-buttons" class= "company_buttons"></div>
           </div>
 
-          <!-- create hover -->
-          <div id="label"></div>
         </div>
 
         <!-- get data -->
@@ -239,6 +243,9 @@
                       const companies = d3.map(data, d => d.company);
                       // console.log(companies)
 
+                      //race label
+                      var raceLabel = svg.append("text").attr("id", "label")
+
 
                       let racedatastructure = {};
                       companies.forEach ( (c) => {
@@ -305,7 +312,7 @@
                         d3.select('h3#pieTitle').selectAll('text').remove();
 
                         let pieTitles = {'Race': 'The Top Executives at '+ company + ' by '+ filterType +'', 'Gender': 'The Top Executives at '+ company + ' by '+ filterType +''};
-                        console.log(pieTitles[filterType])
+                        // console.log(pieTitles[filterType])
                         d3.select('h3#pieTitle').append('text')
                                                 .text(pieTitles[filterType])
 
@@ -341,7 +348,7 @@
                         });
 
                         var data_ready = pie(mapped)
-                        console.log(data_ready)
+                        // console.log(data_ready)
 
                         let test = svg
                           .selectAll('whatever')
@@ -425,12 +432,19 @@
 
 
                               line.on("mouseover", function() {
+                                raceLabel.text(race+": "+Math.round(d[race])+"%")
+                                         .attr("fill", "black")
+                                         .attr("size", "300px")
+                                console.log(this.y1)
+                                raceLabel.attr("x", this.x2.animVal.value + 40).attr("y", (this.y1.animVal.value+this.y2.animVal.value)/2 + 10) 
                                 d3.select(this)
                                     .transition().duration(200)
                                     .attr("stroke-width", 30);
+                                
+                                
 
-                                d3.select("#label")
-                                  .text(race+": "+Math.round(d[race])+"%");
+                                // d3.select("#label")
+                                //   .text(race+": "+Math.round(d[race])+"%");
                               });
 
                               line.on("mouseout", function() {
@@ -465,8 +479,8 @@
 
                         let ft = keys[filterType];
                         let colors = colorOptions[filterType];
-                        console.log(filterType)
-                        console.log(barTitles[filterType])
+                        // console.log(filterType)
+                        // console.log(barTitles[filterType])
 
                         d3.select('h3#barTitle').append('text').text(barTitles[filterType])
                         d3.select('p#barCap').append('text').text(barCaptions[filterType])
