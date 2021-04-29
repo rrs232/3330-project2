@@ -244,7 +244,7 @@
                       // console.log(companies)
 
                       //race label
-                      var raceLabel = svg.append("text").attr("id", "label")
+                      var raceLabel = svg.append("text").attr("id", "label").attr('class', 'label')
 
 
                       let racedatastructure = {};
@@ -436,12 +436,12 @@
                                          .attr("fill", "black")
                                          .attr("size", "300px")
                                 console.log(this.y1)
-                                raceLabel.attr("x", this.x2.animVal.value + 40).attr("y", (this.y1.animVal.value+this.y2.animVal.value)/2 + 10) 
+                                raceLabel.attr("x", this.x2.animVal.value + 40).attr("y", (this.y1.animVal.value+this.y2.animVal.value)/2 + 10)
                                 d3.select(this)
                                     .transition().duration(200)
                                     .attr("stroke-width", 30);
-                                
-                                
+
+
 
                                 // d3.select("#label")
                                 //   .text(race+": "+Math.round(d[race])+"%");

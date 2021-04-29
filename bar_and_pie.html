@@ -110,6 +110,7 @@
 
     #label {
       font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
+      font-weight: bold;
       margin-top: -2%;
       margin-left: 15%;
     }
@@ -560,7 +561,7 @@
                             })
                         });
 
-
+                        // set default blank circle where the position graph will be filled in
                         d3.select('div#svgs').append('svg')
                                               .attr('id', 'default')
                                               .attr('width', 600)
@@ -572,6 +573,8 @@
                                               .style('fill', 'none')
                                               .style('stroke', 'black')
                                               .attr("transform", "translate(" + (600-3*50) / 2 + "," + (400-50) / 2 + ")");
+
+                        // call above functions to initialize with race
                         updateBarsAnimated("Race");
                         updateLegend("Race");
                         updateButtons( "Race" );
