@@ -318,7 +318,7 @@
 
                         // add image to above title
                         d3.select('h3#pieTitle').append('img')
-                                                .attr("apple.png")
+                                                .attr('source', "apple.png")
 
                         var pieCaptions = {'Race': 'Is there fair representation of all backgrounds in '+ company +'’s top executives and senior managers? Looking at the total employee diversity is important, but we must also ensure that there is adequate diversity in the highest ranks and among the decision makers.', 'Gender': 'Is there fair representation of females in '+ company +'’s top executives and senior managers? In a field still overly represented by men, how many tech change-makers are women?'}
                         d3.select('p#pieCap').append('text').text(pieCaptions[filterType])
