@@ -206,6 +206,9 @@
                        .attr("transform",`translate(${margins.left},${margins.top})`)
                        .call(leftAxis)
 
+            //company logos
+            var companyLogo = {"Apple" : 'apple.png', 'Cisco' : 'cisco.png'}
+
             // get first dataset
             d3.csv("group_company_final.csv", d3.autoType)
                 .then((data) => {
@@ -312,6 +315,10 @@
                         let pieTitles = {'Race': 'The Top Executives at '+ company + ' by '+ filterType +'', 'Gender': 'The Top Executives at '+ company + ' by '+ filterType +''};
                         d3.select('h3#pieTitle').append('text')
                                                 .text(pieTitles[filterType])
+
+                        // add image to above title
+                        d3.select('h3#pieTitle').append('img')
+                                                .attr("apple.png")
 
                         var pieCaptions = {'Race': 'Is there fair representation of all backgrounds in '+ company +'’s top executives and senior managers? Looking at the total employee diversity is important, but we must also ensure that there is adequate diversity in the highest ranks and among the decision makers.', 'Gender': 'Is there fair representation of females in '+ company +'’s top executives and senior managers? In a field still overly represented by men, how many tech change-makers are women?'}
                         d3.select('p#pieCap').append('text').text(pieCaptions[filterType])
