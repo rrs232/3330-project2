@@ -204,7 +204,7 @@
                        .call(leftAxis)
 
             //company logos
-            var companyLogo = {"Apple" : 'apple.png', 'Cisco' : 'cisco.png'}
+            var companyLogo = {"Apple" : 'apple.png', 'Cisco' : 'cisco.png', 'Facebook': 'facebook.png', 'Google': 'google.png', 'Intel': 'intel.png', 'LinkedIn': 'linkedin.png', 'Nvidia': 'nvidia.png', 'Pintrest': 'pinterest.png', 'Salesforce': 'salesforce.png', 'Twitter': 'twitter.png', 'Uber': 'uber.png', 'eBay': 'ebay.png'}
 
             // get first dataset
             d3.csv("group_company_final.csv", d3.autoType)
@@ -306,6 +306,7 @@
                         // remove existing pie chart and chart description
                         d3.select("svg#default").remove();
                         d3.select('h3#pieTitle').selectAll('text').remove();
+                        d3.select('h3#pieTitle').selectAll('img').remove();
                         d3.select('p#pieCap').selectAll('text').remove();
 
                         // add title and description for pie chart
@@ -315,7 +316,8 @@
 
                         // add image to above title
                         d3.select('h3#pieTitle').append('img')
-                                                .attr("apple.png")
+                                                .attr("src", companyLogo[company])
+                                                .attr("width", "100px")
 
                         var pieCaptions = {'Race': 'Is there fair representation of all backgrounds in '+ company +'’s top executives and senior managers? Looking at the total employee diversity is important, but we must also ensure that there is adequate diversity in the highest ranks and among the decision makers.', 'Gender': 'Is there fair representation of females in '+ company +'’s top executives and senior managers? In a field still overly represented by men, how many tech change-makers are women?'}
                         d3.select('p#pieCap').append('text').text(pieCaptions[filterType])
