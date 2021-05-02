@@ -62,8 +62,7 @@
         overflow: hidden;
         border: 2px solid black;
         background-color: #f1f1f1;
-        margin-bottom: 40px;
-        margin-top: 40px;
+        margin-bottom: 20px;
      }
 
     .tab button {
@@ -113,9 +112,8 @@
       font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
       font-weight: bold;
       margin-top: -2%;
-      padding: 5px;
+      margin-left: 15%;
     }
-
     </style>
 
   </head>
@@ -361,11 +359,14 @@
                           .attr("stroke", "black")
                           .attr("id", d=> r2torClean[filterType][d.data.key] + ': ' + Math.round((d.endAngle - d.startAngle)/(2*Math.PI)*100,4) + '%')
                           .style("stroke-width", "2px")
+                          .style("opacity", 0.9)
 
                           // on mouseover, display race / gender and percentage of that section
                           .on("mouseover", function() {
+                            console.log(this)
                             d3.select(this)
                               .style('stroke-width', '4px')
+                              .style("opacity", 1)
                             d3.select('#pie')
                               .append('text')
                               .text(this.id)
@@ -381,6 +382,7 @@
                           .on("mouseout", function() {
                             d3.select(this)
                               .style('stroke-width', '2px')
+                              .style("opacity", .9)
 
                             d3.select('#race_label').remove('text')
                           });
@@ -400,6 +402,7 @@
 
                         //loop through each company
                         data.forEach ((d,i) => {
+                          console.log(d)
                           var newHeight = chartHeight
                           let companyRect = stackedBar.append('g')
                                                       .attr('label', d.company);
@@ -431,21 +434,15 @@
 
                               // display race and percentage when mouseover each section of a stacked bar
                               line.on("mouseover", function() {
+                                console.log(barScale(i)+10)
+                                console.log(this)
                                 d3.select(this)
                                     .transition().duration(200)
                                     .attr("stroke-width", 30);
 
                                 d3.select("#label")
-                                  .style('background-color', 'lightgrey')
-                                  .style('width', '480px')
-                                  .style('margin-left', '10px')
-                                  .style('padding', "5px");
-
-                                d3.select('#label')
-                                  .append('text')
                                   .text(pRtoR[filterType][race]+": "+Math.round(d[race])+"%")
                                   .style('color', colors[spot])
-                                  .style('margin-left', '200px')
                               });
 
                               // remove race and percentage when mouseout
@@ -456,8 +453,7 @@
                                     .attr("stroke-width", 20);
 
                                 d3.select("#label")
-                                  .text("")
-                                  .style('padding', '0px');
+                                  .text("");
 
                               });
                             };
