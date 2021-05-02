@@ -27,8 +27,9 @@
       padding-right: 30px;
       padding-left: 30px;
       padding-top: 10px;
-      padding-bottom: 10px;
-      margin-top: -5%;
+      padding-bottom: 0px;
+        margin-bottom: 15px;
+      margin-top: -12%;
     }
 
     .c_buttons {
@@ -74,9 +75,11 @@
         outline: none;
         cursor: default;
         padding: 10px 20px;
-        margin-top: 7px;
+        margin-top: 5px;
         transition: 0.2s;
         font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
+        font-size: 18px;
+        font-weight: bolder;
         margin-left: 38.5%;
         margin-right: -30%;
     }
@@ -115,10 +118,18 @@
     }
 
     #label {
-      font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
-      font-weight: bold;
-      margin-top: -2%;
-      padding: 5px;
+        font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
+        font-weight: bold;
+        margin-top: -2%;
+        padding: 5px;
+    }
+
+    .company_buttons p {
+        font-family:  Century Gothic, CenturyGothic, AppleGothic, sans-serif;
+        font-weight: bolder;
+        background-color: #ffc283;
+        padding: 5px;
+        font-size: 14px;
     }
 
     </style>
@@ -157,7 +168,9 @@
             </div>
 
             <!-- create company buttons -->
-            <div id="company-buttons" class= "company_buttons"></div>
+            <div id="company-buttons" class= "company_buttons">
+                <p>Select a Company</p>
+            </div>
           </div>
 
           <!-- create label to appear on hover -->
@@ -562,7 +575,7 @@
 
                               d3.select('div#svgs').append('svg')
                                                     .attr('id', 'default')
-                                                    .attr('width', 600)
+                                                    .attr('width', 400)
                                                     .attr('height', 400)
                                                   .append('circle')
                                                     .attr('cx', 0)
