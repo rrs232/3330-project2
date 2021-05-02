@@ -313,7 +313,7 @@
                         d3.select('p#pieCap').selectAll('text').remove();
 
                         // add title and description for pie chart
-                        let pieTitles = {'Race': 'The Top Executives at '+ company + ' by '+ filterType +'', 'Gender': 'The Top Executives at '+ company + ' by '+ filterType +''};
+                        let pieTitles = {'Race': 'The Top Executives at ', 'Gender': 'The Top Executives at '};
                         d3.select('h3#pieTitle').append('text')
                                                 .text(pieTitles[filterType])
 
@@ -321,6 +321,11 @@
                         d3.select('h3#pieTitle').append('img')
                                                 .attr("src", companyLogo[company])
                                                 .attr("width", "100px")
+                                                .attr("height", "70px")
+                                                .attr("display", "block")
+                        let pieTitles2 = {'Race': ' by '+ filterType +'', 'Gender': ' by '+ filterType +''};
+                        d3.select('h3#pieTitle').append('text')
+                                                .text(pieTitles2[filterType])
 
                         var pieCaptions = {'Race': 'Is there fair representation of all backgrounds in '+ company +'’s top executives and senior managers? Looking at the total employee diversity is important, but we must also ensure that there is adequate diversity in the highest ranks and among the decision makers.', 'Gender': 'Is there fair representation of females in '+ company +'’s top executives and senior managers? In a field still overly represented by men, how many tech change-makers are women?'}
                         d3.select('p#pieCap').append('text').text(pieCaptions[filterType])
