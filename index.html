@@ -61,12 +61,14 @@
     .tab {
         overflow: hidden;
         border: 2px solid black;
-        background-color: #f1f1f1;
+        background-color: #ffc283;
         margin-bottom: 40px;
         margin-top: 40px;
+        height: 50px;
      }
 
     .tab button {
+        background-color: #ffc283;
         float: left;
         border: none;
         outline: none;
@@ -367,12 +369,12 @@
                           .attr('fill', function(d){ return(color(d.data.key)) })
                           .attr("stroke", "black")
                           .attr("id", d=> r2torClean[filterType][d.data.key] + ': ' + Math.round((d.endAngle - d.startAngle)/(2*Math.PI)*100,4) + '%')
-                          .style("stroke-width", "2px")
+                          .style("stroke-width", "1px")
 
                           // on mouseover, display race / gender and percentage of that section
                           .on("mouseover", function() {
                             d3.select(this)
-                              .style('stroke-width', '4px')
+                              .style('stroke-width', '3px')
                             d3.select('#pie')
                               .append('text')
                               .text(this.id)
@@ -387,7 +389,7 @@
                           // on mouseout, remove this label and styling
                           .on("mouseout", function() {
                             d3.select(this)
-                              .style('stroke-width', '2px')
+                              .style('stroke-width', '1px')
 
                             d3.select('#race_label').remove('text')
                           });
@@ -443,7 +445,7 @@
                                     .attr("stroke-width", 30);
 
                                 d3.select("#label")
-                                  .style('background-color', 'lightgrey')
+                                  .style('background-color', '#E8E8E8')
                                   .style('width', '480px')
                                   .style('margin-left', '10px')
                                   .style('padding', "5px");
